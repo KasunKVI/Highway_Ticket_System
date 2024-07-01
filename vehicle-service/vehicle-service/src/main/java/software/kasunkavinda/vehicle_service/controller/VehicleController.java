@@ -6,8 +6,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import software.kasunkavinda.vehicle_service.dto.ResponseDTO;
 import software.kasunkavinda.vehicle_service.dto.VehicleDTO;
+import software.kasunkavinda.vehicle_service.service.UserService;
 import software.kasunkavinda.vehicle_service.service.VehicleService;
 
 @RestController
@@ -17,27 +19,38 @@ public class VehicleController {
 
 
     private final VehicleService vehicleService;
+    private final UserService userService;
     private final ResponseDTO responseDTO;
 
     private static final Logger logger = LoggerFactory.getLogger(VehicleController.class);
+
 
 
     @PostMapping("/create")
     public ResponseEntity<ResponseDTO> newVehicle(@RequestBody VehicleDTO vehicleDTO) {
 
         logger.info("Saving Vehicle details");
+
         try {
-            String opt = vehicleService.newVehicle(vehicleDTO);
-            if (opt.equals("Vehicle already exists")) {
-                responseDTO.setCode("400");
-                responseDTO.setMessage("Vehicle already exists");
+            boolean isUserExist = userService.isUserExists(vehicleDTO.getUserId());
+            if (!isUserExist){
+                responseDTO.setCode("404");
+                responseDTO.setMessage("User not found");
                 responseDTO.setContent(vehicleDTO);
-                return new ResponseEntity<>(responseDTO, HttpStatus.MULTI_STATUS);
-            } else {
-                responseDTO.setCode("200");
-                responseDTO.setMessage("Vehicle saved successfully");
-                responseDTO.setContent(vehicleDTO);
-                return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+                return new ResponseEntity<>(responseDTO, HttpStatus.BAD_REQUEST);
+            }else {
+                String opt = vehicleService.newVehicle(vehicleDTO);
+                if (opt.equals("Vehicle already exists")) {
+                    responseDTO.setCode("207");
+                    responseDTO.setMessage("Vehicle already exists");
+                    responseDTO.setContent(vehicleDTO);
+                    return new ResponseEntity<>(responseDTO, HttpStatus.MULTI_STATUS);
+                } else {
+                    responseDTO.setCode("200");
+                    responseDTO.setMessage("Vehicle saved successfully");
+                    responseDTO.setContent(vehicleDTO);
+                    return new ResponseEntity<>(responseDTO, HttpStatus.OK);
+                }
             }
         } catch (Exception exception) {
             logger.error("Error saving vehicle : ", exception);
@@ -57,12 +70,21 @@ public class VehicleController {
         ResponseEntity<ResponseDTO> responseEntity = new ResponseEntity<>(responseDTO,HttpStatus.OK);
 
         try {
-            String resp = vehicleService.updateVehicle(vehicleDTO);
-            if (resp.equals("Vehicle updated successfully")) {
-                responseDTO.setCode("200");
-                responseDTO.setMessage("Vehicle updated successfully");
+            boolean isUserExist = userService.isUserExists(vehicleDTO.getUserId());
+
+            if (!isUserExist){
+                responseDTO.setCode("404");
+                responseDTO.setMessage("User not found");
                 responseDTO.setContent(vehicleDTO);
-                responseEntity =  new ResponseEntity<>(responseDTO, HttpStatus.OK);
+                return new ResponseEntity<>(responseDTO, HttpStatus.BAD_REQUEST);
+            }else {
+                String resp = vehicleService.updateVehicle(vehicleDTO);
+                if (resp.equals("Vehicle updated successfully")) {
+                    responseDTO.setCode("200");
+                    responseDTO.setMessage("Vehicle updated successfully");
+                    responseDTO.setContent(vehicleDTO);
+                    responseEntity = new ResponseEntity<>(responseDTO, HttpStatus.OK);
+                }
             }
         } catch (Exception exception) {
             logger.error("Error updating vehicle: ", exception);
