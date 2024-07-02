@@ -46,27 +46,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDTO getUser(String id) {
+    public UserDTO getUser(String id) throws NotFoundException {
         logger.info("Fetching user: {}", id);
-        User user = userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
+        User user = userRepo.getReferenceById(id);
         return new UserDTO(user.getId(), user.getName());
     }
 
     @Override
     public String updateUser(UserDTO userDTO) {
         logger.info("Attempting to update User: {}", userDTO.getId());
-        Optional<User> existingUserOpt = userRepo.findById(userDTO.getId());
-        if (!existingUserOpt.isPresent()) {
-            logger.warn("User not found: {}", userDTO.getId());
-            throw new NotFoundException("User not found");
-        }
+        User existingUserOpt = userRepo.getReferenceById(userDTO.getId());
 
-        User existingUser = existingUserOpt.get();
 
         // Update the customer entity with new values
         User updateUser =new User(userDTO.getId(),userDTO.getName());
-        updateUser.setId(existingUser.getId()); // Ensure the ID remains the same
+        updateUser.setId(existingUserOpt.getId()); // Ensure the ID remains the same
 
         userRepo.save(updateUser);
         logger.info("User updated successfully: {}", updateUser.getId());
