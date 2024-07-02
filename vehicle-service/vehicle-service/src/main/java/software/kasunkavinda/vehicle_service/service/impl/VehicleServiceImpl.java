@@ -71,4 +71,10 @@ public class VehicleServiceImpl implements VehicleService {
         logger.info("Vehicle updated successfully: {}", updateVehicle.getId());
         return "Vehicle updated successfully";
     }
+
+    @Override
+    public boolean isVehicleExist(String id) {
+        logger.info("Fetching Vehicle: {}", id);
+        return vehicleRepo.existsById(id);
+    }
 }

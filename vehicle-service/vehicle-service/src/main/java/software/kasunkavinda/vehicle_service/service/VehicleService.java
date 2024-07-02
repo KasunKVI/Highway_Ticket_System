@@ -7,4 +7,5 @@ public interface VehicleService {
     void deleteVehicle(String id);
     VehicleDTO getVehicle(String id);
     String updateVehicle(VehicleDTO vehicleDTO);
+    boolean isVehicleExist(String id);
 }

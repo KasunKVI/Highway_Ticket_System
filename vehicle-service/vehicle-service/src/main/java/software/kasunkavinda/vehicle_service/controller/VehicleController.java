@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import software.kasunkavinda.vehicle_service.dto.ResponseDTO;
@@ -27,7 +28,7 @@ public class VehicleController {
 
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseDTO> newVehicle(@RequestBody VehicleDTO vehicleDTO) {
+    public ResponseEntity<ResponseDTO> newVehicle(@Validated @RequestBody VehicleDTO vehicleDTO) {
 
         logger.info("Saving Vehicle details");
 
@@ -64,7 +65,7 @@ public class VehicleController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<ResponseDTO> updateVehicle(@RequestBody VehicleDTO vehicleDTO) {
+    public ResponseEntity<ResponseDTO> updateVehicle(@Validated @RequestBody VehicleDTO vehicleDTO) {
         logger.info("Updating Vehicle details");
 
         ResponseEntity<ResponseDTO> responseEntity = new ResponseEntity<>(responseDTO,HttpStatus.OK);
@@ -96,7 +97,7 @@ public class VehicleController {
         return responseEntity;
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/selectedVehicle/{id}")
     public ResponseEntity<?> getSelectedVehicle(@PathVariable String id) {
         logger.info("Fetching Vehicle with ID: {}", id);
         try {
@@ -104,6 +105,21 @@ public class VehicleController {
             return new ResponseEntity<>(vehicleDTO, HttpStatus.OK);
         } catch (Exception exception) {
             logger.error("Error fetching Vehicle by ID: {}", id, exception);
+            responseDTO.setCode("500");
+            responseDTO.setMessage("Internal server error");
+            responseDTO.setContent(exception.getMessage());
+            return new ResponseEntity<>(responseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/vehicleExists/{vehicleId}")
+    public ResponseEntity<?> isVehicleExists(@PathVariable String vehicleId) {
+        logger.info("Fetching Vehicle with ID: {}", vehicleId);
+        try {
+            boolean isExist = vehicleService.isVehicleExist(vehicleId);
+            return new ResponseEntity<>(isExist, HttpStatus.OK);
+        } catch (Exception exception) {
+            logger.error("Error fetching Vehicle by ID: {}", vehicleId, exception);
             responseDTO.setCode("500");
             responseDTO.setMessage("Internal server error");
             responseDTO.setContent(exception.getMessage());
