@@ -48,8 +48,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketDTO getTicket(String id) {
         logger.info("Fetching ticket: {}", id);
-        Ticket ticket = ticketRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ticket not found"));
+        Ticket ticket = ticketRepo.getReferenceById(id);
         return new TicketDTO(ticket.getId(),ticket.getDescription(),ticket.getDate(),ticket.getTime(),ticket.getStatus(),ticket.getVehicleId());
     }
 
@@ -57,17 +56,11 @@ public class TicketServiceImpl implements TicketService {
     public String updateTicket(TicketDTO ticketDTO) {
 
         logger.info("Attempting to update Ticket: {}", ticketDTO.getId());
-        Optional<Ticket> existingTicketOpt = ticketRepo.findById(ticketDTO.getId());
-        if (!existingTicketOpt.isPresent()) {
-            logger.warn("Ticket not found: {}", ticketDTO.getId());
-            throw new NotFoundException("Ticket not found");
-        }
-
-        Ticket existingTicket = existingTicketOpt.get();
+        Ticket existingTicketOpt = ticketRepo.getReferenceById(ticketDTO.getId());
 
         // Update the customer entity with new values
         Ticket updateTicket =new Ticket(ticketDTO.getId(),ticketDTO.getDescription(), ticketDTO.getDate(), ticketDTO.getTime(),ticketDTO.getStatus(),ticketDTO.getVehicleId());
-        updateTicket.setId(existingTicket.getId()); // Ensure the ID remains the same
+        updateTicket.setId(existingTicketOpt.getId()); // Ensure the ID remains the same
 
         ticketRepo.save(updateTicket);
         logger.info("Ticket updated successfully: {}", ticketDTO.getId());
