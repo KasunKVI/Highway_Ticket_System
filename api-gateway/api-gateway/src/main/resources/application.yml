@@ -8,15 +8,16 @@ spring:
     gateway:
       mvc:
         routes:
-          - id: user-service
-            uri: lb://user-service
-            predicates:
-              - Path=/api/v1/user/**
 
           - id: vehicle-service
             uri: lb://vehicle-service
             predicates:
               - Path=/api/v1/vehicle/**
+
+          - id: user-service
+            uri: lb://user-service
+            predicates:
+              - Path=/api/v1/user/**
 
           - id: payment-service
             uri: lb://payment-service
@@ -32,5 +33,6 @@ spring:
 eureka:
   client:
     register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka
