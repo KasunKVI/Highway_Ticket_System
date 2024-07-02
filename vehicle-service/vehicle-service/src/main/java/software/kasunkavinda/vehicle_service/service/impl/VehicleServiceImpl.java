@@ -47,25 +47,18 @@ public class VehicleServiceImpl implements VehicleService {
     @Override
     public VehicleDTO getVehicle(String id) {
         logger.info("Fetching Vehicle: {}", id);
-        Vehicle vehicle = vehicleRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Vehicle not found"));
+        Vehicle vehicle = vehicleRepo.getReferenceById(id);
         return new VehicleDTO(vehicle.getId(), vehicle.getType(),vehicle.getUserId());
     }
 
     @Override
     public String updateVehicle(VehicleDTO vehicleDTO) {
         logger.info("Attempting to update Vehicle: {}", vehicleDTO.getId());
-        Optional<Vehicle> existingVehicleOpt = vehicleRepo.findById(vehicleDTO.getId());
-        if (!existingVehicleOpt.isPresent()) {
-            logger.warn("Vehicle not found: {}", vehicleDTO.getId());
-            throw new NotFoundException("Vehicle not found");
-        }
-
-        Vehicle existingVehicle = existingVehicleOpt.get();
+        Vehicle existingVehicleOpt = vehicleRepo.getReferenceById(vehicleDTO.getId());
 
         // Update the customer entity with new values
         Vehicle updateVehicle =new Vehicle(vehicleDTO.getId(),vehicleDTO.getType(),vehicleDTO.getUserId());
-        updateVehicle.setId(existingVehicle.getId()); // Ensure the ID remains the same
+        updateVehicle.setId(existingVehicleOpt.getId()); // Ensure the ID remains the same
 
         vehicleRepo.save(updateVehicle);
         logger.info("Vehicle updated successfully: {}", updateVehicle.getId());
