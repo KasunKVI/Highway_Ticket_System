@@ -6,7 +6,6 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.util.Date;
 
@@ -24,6 +23,5 @@ public class Ticket {
     private String time;
     private String status;
     private String vehicleId;
-    private String paymentId;
 
 }

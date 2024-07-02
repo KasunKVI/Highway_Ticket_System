@@ -34,7 +34,7 @@ public class TicketServiceImpl implements TicketService {
             logger.warn("Ticket id already exists: {}", ticketDTO.getId());
             throw new QuantityExceededException("Ticket already exists");
         } else {
-           ticketRepo.save(new Ticket(ticketDTO.getId(),ticketDTO.getDescription(),ticketDTO.getDate(), ticketDTO.getTime(),ticketDTO.getStatus(),ticketDTO.getVehicleId(),ticketDTO.getPaymentId()));
+           ticketRepo.save(new Ticket(ticketDTO.getId(),ticketDTO.getDescription(),ticketDTO.getDate(), ticketDTO.getTime(),ticketDTO.getStatus(),ticketDTO.getVehicleId()));
             logger.info("Ticket saved successfully: {}", ticketDTO.getId());
             return "Ticket saved successfully";
         }
@@ -50,11 +50,12 @@ public class TicketServiceImpl implements TicketService {
         logger.info("Fetching ticket: {}", id);
         Ticket ticket = ticketRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ticket not found"));
-        return new TicketDTO(ticket.getId(),ticket.getDescription(),ticket.getDate(),ticket.getTime(),ticket.getStatus(),ticket.getVehicleId(),ticket.getPaymentId());
+        return new TicketDTO(ticket.getId(),ticket.getDescription(),ticket.getDate(),ticket.getTime(),ticket.getStatus(),ticket.getVehicleId());
     }
 
     @Override
     public String updateTicket(TicketDTO ticketDTO) {
+
         logger.info("Attempting to update Ticket: {}", ticketDTO.getId());
         Optional<Ticket> existingTicketOpt = ticketRepo.findById(ticketDTO.getId());
         if (!existingTicketOpt.isPresent()) {
@@ -64,9 +65,8 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket existingTicket = existingTicketOpt.get();
 
-
         // Update the customer entity with new values
-        Ticket updateTicket =new Ticket(ticketDTO.getId(),ticketDTO.getDescription(), ticketDTO.getDate(), ticketDTO.getTime(),ticketDTO.getStatus(),ticketDTO.getVehicleId(),ticketDTO.getPaymentId());
+        Ticket updateTicket =new Ticket(ticketDTO.getId(),ticketDTO.getDescription(), ticketDTO.getDate(), ticketDTO.getTime(),ticketDTO.getStatus(),ticketDTO.getVehicleId());
         updateTicket.setId(existingTicket.getId()); // Ensure the ID remains the same
 
         ticketRepo.save(updateTicket);
